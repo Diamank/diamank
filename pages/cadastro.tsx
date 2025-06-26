@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/router'
-import { supabase } from '@/utils/supabase'
 import { toast } from 'sonner'
 
 export default function Cadastro() {
@@ -25,21 +24,16 @@ export default function Cadastro() {
 
     setCarregando(true)
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password: senha,
-      options: {
-        data: {
-          nome,
-          cnpj,
-          telefone,
-          tipo: 'cedente'
-        }
-      }
+    const resposta = await fetch('/api/cadastro', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nome, email, senha, cnpj, telefone })
     })
 
-    if (error) {
-      toast.error('Erro ao cadastrar: ' + error.message)
+    const resultado = await resposta.json()
+
+    if (!resposta.ok) {
+      toast.error('Erro: ' + resultado.erro)
     } else {
       toast.success('Cadastro realizado com sucesso!')
       router.push('/login')
