@@ -23,6 +23,7 @@ export default function Painel() {
           <Link href="/painel/documentos" className="text-blue-600 hover:underline">📂 Documentos</Link>
           <Link href="/painel/movimentacoes" className="text-blue-600 hover:underline">💰 Movimentações</Link>
           <Link href="/painel/boletos" className="text-blue-600 hover:underline">🏦 Boletos</Link>
+          <Link href="/painel/banco" className="text-blue-600 hover:underline">🏦 Dados Bancários</Link>
         </nav>
         <button
           onClick={handleLogout}
