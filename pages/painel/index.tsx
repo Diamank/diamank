@@ -1,14 +1,6 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import {
-  Home,
-  User,
-  Link as LinkIcon,
-  BarChart2,
-  Wallet,
-  PencilLine
-} from 'lucide-react'
-import {
   LineChart,
   Line,
   XAxis,
@@ -19,6 +11,7 @@ import {
 
 export default function Painel() {
   const [dias, setDias] = useState(7)
+  const [dados, setDados] = useState<any[]>([])
   const [dadosFixos, setDadosFixos] = useState<any[]>([])
 
   useEffect(() => {
@@ -41,14 +34,24 @@ export default function Painel() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex font-sans text-neutral-800">
-      {/* Menu lateral com ícones */}
-      <aside className="w-20 bg-white shadow-lg py-6 flex flex-col items-center space-y-6">
-        <MenuItem href="/painel" icon={<Home size={24} />} label="Início" />
-        <MenuItem href="/painel/banco" icon={<User size={24} />} label="Dados" />
-        <MenuItem href="/painel/links" icon={<LinkIcon size={24} />} label="Links" />
-        <MenuItem href="/painel/relatorio" icon={<BarChart2 size={24} />} label="Relatório" />
-        <MenuItem href="/painel/saque" icon={<Wallet size={24} />} label="Saque" />
-        <MenuItem href="/painel/assinatura" icon={<PencilLine size={24} />} label="Assinatura" />
+      {/* Menu lateral */}
+      <aside className="w-64 bg-white shadow-lg p-6 hidden md:block">
+        <h2 className="text-xl font-bold mb-6">Painel do Cedente</h2>
+        <nav className="flex flex-col space-y-4 text-blue-600 font-medium">
+          <Link href="/painel" className="hover:underline">🏠 Dashboard</Link>
+          <Link href="/painel/notas" className="hover:underline">📄 Notas Fiscais</Link>
+          <Link href="/painel/contratos" className="hover:underline">📑 Contratos</Link>
+          <Link href="/painel/documentos" className="hover:underline">📂 Documentos</Link>
+          <Link href="/painel/movimentacoes" className="hover:underline">💰 Movimentações</Link>
+          <Link href="/painel/boletos" className="hover:underline">🏦 Boletos</Link>
+          <Link href="/painel/banco" className="hover:underline">🏛️ Dados Bancários</Link>
+        </nav>
+        <button
+          onClick={() => alert('Logout simulado')}
+          className="mt-10 w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600"
+        >
+          Sair
+        </button>
       </aside>
 
       {/* Conteúdo */}
@@ -113,23 +116,5 @@ export default function Painel() {
         </div>
       </main>
     </div>
-  )
-}
-
-// Componente auxiliar de item de menu com ícone + legenda
-function MenuItem({
-  href,
-  icon,
-  label,
-}: {
-  href: string
-  icon: React.ReactNode
-  label: string
-}) {
-  return (
-    <Link href={href} className="flex flex-col items-center text-gray-700 hover:text-blue-600 transition">
-      {icon}
-      <span className="text-xs mt-1">{label}</span>
-    </Link>
   )
 }
