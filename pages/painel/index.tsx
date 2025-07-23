@@ -3,11 +3,12 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import {
   Home,
-  User,
-  Link2,
-  BarChart3,
-  Banknote,
-  PenLine
+  FileText,
+  FileSignature,
+  Folder,
+  DollarSign,
+  Bank,
+  Landmark
 } from 'lucide-react'
 import {
   LineChart,
@@ -44,14 +45,15 @@ export default function Painel() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex font-sans text-neutral-800">
-      {/* Menu lateral vertical com ícones */}
+      {/* Menu lateral com ícones empilhados */}
       <aside className="w-20 bg-white shadow-lg py-6 flex flex-col items-center space-y-6">
-        <MenuIcon href="/painel" icon={<Home size={24} />} label="Início" active={router.pathname === '/painel'} />
-        <MenuIcon href="/painel/banco" icon={<User size={24} />} label="Dados" active={router.pathname === '/painel/banco'} />
-        <MenuIcon href="/painel/links" icon={<Link2 size={24} />} label="Links" active={router.pathname === '/painel/links'} />
-        <MenuIcon href="/painel/relatorio" icon={<BarChart3 size={24} />} label="Relatório" active={router.pathname === '/painel/relatorio'} />
-        <MenuIcon href="/painel/saque" icon={<Banknote size={24} />} label="Saque" active={router.pathname === '/painel/saque'} />
-        <MenuIcon href="/painel/assinatura" icon={<PenLine size={24} />} label="Assinatura" active={router.pathname === '/painel/assinatura'} />
+        <MenuIcon href="/painel" icon={<Home size={24} />} label="Dashboard" active={router.pathname === '/painel'} />
+        <MenuIcon href="/painel/notas" icon={<FileText size={24} />} label="Notas" active={router.pathname === '/painel/notas'} />
+        <MenuIcon href="/painel/contratos" icon={<FileSignature size={24} />} label="Contratos" active={router.pathname === '/painel/contratos'} />
+        <MenuIcon href="/painel/documentos" icon={<Folder size={24} />} label="Documentos" active={router.pathname === '/painel/documentos'} />
+        <MenuIcon href="/painel/movimentacoes" icon={<DollarSign size={24} />} label="Movim." active={router.pathname === '/painel/movimentacoes'} />
+        <MenuIcon href="/painel/boletos" icon={<Bank size={24} />} label="Boletos" active={router.pathname === '/painel/boletos'} />
+        <MenuIcon href="/painel/banco" icon={<Landmark size={24} />} label="Bancário" active={router.pathname === '/painel/banco'} />
       </aside>
 
       {/* Conteúdo */}
@@ -62,11 +64,11 @@ export default function Painel() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div className="bg-white rounded-xl p-6 shadow-md text-center">
             <h2 className="text-sm font-medium text-gray-500 mb-1">Notas Negociadas</h2>
-            <p className="text-3xl font-bold text-gray-800">{totalNotas}</p>
+            <p className="text-3xl font-bold text-gray-900">{totalNotas}</p>
           </div>
           <div className="bg-white rounded-xl p-6 shadow-md text-center">
             <h2 className="text-sm font-medium text-gray-500 mb-1">Volume Negociado</h2>
-            <p className="text-3xl font-bold text-gray-800">
+            <p className="text-3xl font-bold text-gray-900">
               R$ {totalValor.toLocaleString('pt-BR')}
             </p>
           </div>
@@ -96,37 +98,35 @@ export default function Painel() {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={dadosFiltrados}>
-                <XAxis dataKey="data" tick={{ fontSize: 12 }} />
-                <YAxis
-                  tickFormatter={(v) => `R$ ${v.toLocaleString('pt-BR')}`}
-                  tick={{ fontSize: 12 }}
-                />
-                <Tooltip
-                  formatter={(value: number) =>
-                    [`R$ ${value.toLocaleString('pt-BR')}`, 'Volume']
-                  }
-                />
-                <Line
-                  type="monotone"
-                  dataKey="valor"
-                  stroke="#2563eb"
-                  strokeWidth={3}
-                  dot={{ r: 4 }}
-                  activeDot={{ r: 6 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={dadosFiltrados}>
+              <XAxis dataKey="data" tick={{ fontSize: 12 }} />
+              <YAxis
+                tickFormatter={(v) => `R$ ${v.toLocaleString('pt-BR')}`}
+                tick={{ fontSize: 12 }}
+              />
+              <Tooltip
+                formatter={(value: number) =>
+                  [`R$ ${value.toLocaleString('pt-BR')}`, 'Volume']
+                }
+              />
+              <Line
+                type="monotone"
+                dataKey="valor"
+                stroke="#2563eb"
+                strokeWidth={3}
+                dot={{ r: 4 }}
+                activeDot={{ r: 6 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       </main>
     </div>
   )
 }
 
-// Componente de item de menu com ícone e label empilhados
+// Componente de ícone do menu lateral
 function MenuIcon({
   href,
   icon,
