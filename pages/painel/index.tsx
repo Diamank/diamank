@@ -2,6 +2,14 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import {
+  Home,
+  User,
+  Link2,
+  BarChart3,
+  Banknote,
+  Signature
+} from 'lucide-react'
+import {
   LineChart,
   Line,
   XAxis,
@@ -36,24 +44,14 @@ export default function Painel() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex font-sans text-neutral-800">
-      {/* Menu lateral */}
-      <aside className="w-64 bg-white shadow-lg p-6 hidden md:block">
-        <h2 className="text-xl font-bold mb-6">Painel do Cedente</h2>
-        <nav className="flex flex-col space-y-4 text-sm font-medium">
-          <MenuItem href="/painel" label="🏠 Dashboard" active={router.pathname === '/painel'} />
-          <MenuItem href="/painel/notas" label="📄 Notas Fiscais" active={router.pathname === '/painel/notas'} />
-          <MenuItem href="/painel/contratos" label="📑 Contratos" active={router.pathname === '/painel/contratos'} />
-          <MenuItem href="/painel/documentos" label="📂 Documentos" active={router.pathname === '/painel/documentos'} />
-          <MenuItem href="/painel/movimentacoes" label="💰 Movimentações" active={router.pathname === '/painel/movimentacoes'} />
-          <MenuItem href="/painel/boletos" label="🏦 Boletos" active={router.pathname === '/painel/boletos'} />
-          <MenuItem href="/painel/banco" label="🏛️ Dados Bancários" active={router.pathname === '/painel/banco'} />
-        </nav>
-        <button
-          onClick={() => alert('Logout simulado')}
-          className="mt-10 w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600"
-        >
-          Sair
-        </button>
+      {/* Menu lateral vertical com ícones */}
+      <aside className="w-20 bg-white shadow-lg py-6 flex flex-col items-center space-y-6">
+        <MenuIcon href="/painel" icon={<Home size={24} />} label="Início" active={router.pathname === '/painel'} />
+        <MenuIcon href="/painel/banco" icon={<User size={24} />} label="Dados" active={router.pathname === '/painel/banco'} />
+        <MenuIcon href="/painel/links" icon={<Link2 size={24} />} label="Links" active={router.pathname === '/painel/links'} />
+        <MenuIcon href="/painel/relatorio" icon={<BarChart3 size={24} />} label="Relatório" active={router.pathname === '/painel/relatorio'} />
+        <MenuIcon href="/painel/saque" icon={<Banknote size={24} />} label="Saque" active={router.pathname === '/painel/saque'} />
+        <MenuIcon href="/painel/assinatura" icon={<Signature size={24} />} label="Assinatura" active={router.pathname === '/painel/assinatura'} />
       </aside>
 
       {/* Conteúdo */}
@@ -128,24 +126,26 @@ export default function Painel() {
   )
 }
 
-// Item do menu com destaque para o ativo
-function MenuItem({
+// Componente de item de menu com ícone e label empilhados
+function MenuIcon({
   href,
+  icon,
   label,
   active,
 }: {
   href: string
+  icon: React.ReactNode
   label: string
   active: boolean
 }) {
   return (
-    <Link
-      href={href}
-      className={`hover:underline ${
-        active ? 'font-bold text-black' : 'text-blue-600'
-      }`}
-    >
-      {label}
+    <Link href={href} className="flex flex-col items-center text-center group">
+      <div className={`text-gray-600 group-hover:text-blue-600 ${active ? 'text-blue-600' : ''}`}>
+        {icon}
+      </div>
+      <span className={`text-xs mt-1 ${active ? 'text-blue-600 font-semibold' : 'text-gray-500'}`}>
+        {label}
+      </span>
     </Link>
   )
 }
