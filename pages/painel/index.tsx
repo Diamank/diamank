@@ -7,7 +7,7 @@ import {
   Link2,
   BarChart3,
   Banknote,
-  Signature
+  PenLine
 } from 'lucide-react'
 import {
   LineChart,
@@ -51,7 +51,7 @@ export default function Painel() {
         <MenuIcon href="/painel/links" icon={<Link2 size={24} />} label="Links" active={router.pathname === '/painel/links'} />
         <MenuIcon href="/painel/relatorio" icon={<BarChart3 size={24} />} label="Relatório" active={router.pathname === '/painel/relatorio'} />
         <MenuIcon href="/painel/saque" icon={<Banknote size={24} />} label="Saque" active={router.pathname === '/painel/saque'} />
-        <MenuIcon href="/painel/assinatura" icon={<Signature size={24} />} label="Assinatura" active={router.pathname === '/painel/assinatura'} />
+        <MenuIcon href="/painel/assinatura" icon={<PenLine size={24} />} label="Assinatura" active={router.pathname === '/painel/assinatura'} />
       </aside>
 
       {/* Conteúdo */}
