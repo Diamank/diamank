@@ -11,7 +11,6 @@ import {
 
 export default function Painel() {
   const [dias, setDias] = useState(7)
-
   const [dados, setDados] = useState<any[]>([])
   const [dadosFixos, setDadosFixos] = useState<any[]>([])
 
@@ -30,13 +29,12 @@ export default function Painel() {
   }, [])
 
   const dadosFiltrados = dadosFixos.slice(-dias)
-
   const totalNotas = dadosFixos.reduce((soma, item) => soma + item.quantidade, 0)
   const totalValor = dadosFixos.reduce((soma, item) => soma + item.valor, 0)
 
   return (
     <div className="min-h-screen bg-gray-50 flex font-sans text-neutral-800">
-      {/* Sidebar */}
+      {/* Menu lateral */}
       <aside className="w-64 bg-white shadow-lg p-6 hidden md:block">
         <h2 className="text-xl font-bold mb-6">Painel do Cedente</h2>
         <nav className="flex flex-col space-y-4 text-blue-600 font-medium">
@@ -62,13 +60,13 @@ export default function Painel() {
 
         {/* Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-          <div className="bg-yellow-100 rounded-xl p-6 shadow-sm">
-            <h2 className="text-sm text-gray-600">Notas Negociadas</h2>
-            <p className="text-3xl font-semibold text-yellow-800">{totalNotas}</p>
+          <div className="bg-white rounded-xl p-6 shadow-md text-center">
+            <h2 className="text-sm font-medium text-gray-500 mb-1">Notas Negociadas</h2>
+            <p className="text-3xl font-bold text-gray-800">{totalNotas}</p>
           </div>
-          <div className="bg-green-100 rounded-xl p-6 shadow-sm">
-            <h2 className="text-sm text-gray-600">Volume Negociado</h2>
-            <p className="text-3xl font-semibold text-green-800">
+          <div className="bg-white rounded-xl p-6 shadow-md text-center">
+            <h2 className="text-sm font-medium text-gray-500 mb-1">Volume Negociado</h2>
+            <p className="text-3xl font-bold text-gray-800">
               R$ {totalValor.toLocaleString('pt-BR')}
             </p>
           </div>
