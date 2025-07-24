@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import {
-  Home,
   FileText,
-  FileSignature,
+  ScrollText,
   Folder,
   DollarSign,
   Landmark,
-  Banknote
+  Banknote,
+  Home
 } from 'lucide-react'
 import {
   LineChart,
@@ -21,7 +21,7 @@ import {
 
 export default function Painel() {
   const router = useRouter()
-  const [dias, setDias] = useState(7)
+  const [dias, setDias] = useState(30)
   const [dadosFixos, setDadosFixos] = useState<any[]>([])
 
   useEffect(() => {
@@ -49,11 +49,11 @@ export default function Painel() {
       <aside className="w-20 bg-white shadow-lg py-6 flex flex-col items-center space-y-6">
         <MenuIcon href="/painel" icon={<Home size={24} />} label="Início" active={router.pathname === '/painel'} />
         <MenuIcon href="/painel/notas" icon={<FileText size={24} />} label="Notas" active={router.pathname === '/painel/notas'} />
-        <MenuIcon href="/painel/contratos" icon={<FileSignature size={24} />} label="Contratos" active={router.pathname === '/painel/contratos'} />
+        <MenuIcon href="/painel/contratos" icon={<ScrollText size={24} />} label="Contratos" active={router.pathname === '/painel/contratos'} />
         <MenuIcon href="/painel/documentos" icon={<Folder size={24} />} label="Documentos" active={router.pathname === '/painel/documentos'} />
         <MenuIcon href="/painel/movimentacoes" icon={<DollarSign size={24} />} label="Movimentos" active={router.pathname === '/painel/movimentacoes'} />
-        <MenuIcon href="/painel/boletos" icon={<Landmark size={24} />} label="Boletos" active={router.pathname === '/painel/boletos'} />
-        <MenuIcon href="/painel/banco" icon={<Banknote size={24} />} label="Bancário" active={router.pathname === '/painel/banco'} />
+        <MenuIcon href="/painel/boletos" icon={<Banknote size={24} />} label="Boletos" active={router.pathname === '/painel/boletos'} />
+        <MenuIcon href="/painel/bancario" icon={<Landmark size={24} />} label="Bancário" active={router.pathname === '/painel/bancario'} />
       </aside>
 
       {/* Conteúdo */}
@@ -61,13 +61,13 @@ export default function Painel() {
         <h1 className="text-2xl font-bold mb-6">Olá, teste@cedente.com</h1>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div className="bg-black text-white rounded-xl p-6 shadow-md text-center">
-            <h2 className="text-sm font-medium text-gray-300 mb-1">Notas Negociadas</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 max-w-4xl">
+          <div className="bg-black rounded-xl p-6 shadow-md text-center text-white">
+            <h2 className="text-sm font-medium mb-1">Notas Negociadas</h2>
             <p className="text-3xl font-bold">{totalNotas}</p>
           </div>
-          <div className="bg-black text-white rounded-xl p-6 shadow-md text-center">
-            <h2 className="text-sm font-medium text-gray-300 mb-1">Volume Negociado</h2>
+          <div className="bg-black rounded-xl p-6 shadow-md text-center text-white">
+            <h2 className="text-sm font-medium mb-1">Volume Negociado</h2>
             <p className="text-3xl font-bold">
               R$ {totalValor.toLocaleString('pt-BR')}
             </p>
@@ -75,12 +75,10 @@ export default function Painel() {
         </div>
 
         {/* Última data */}
-        <p className="text-sm text-gray-500 mb-4">
-          Última negociação: {ultimaData}
-        </p>
+        <p className="text-sm text-gray-500 mb-4 max-w-4xl">Última negociação: {ultimaData}</p>
 
         {/* Gráfico */}
-        <div className="bg-white rounded-xl shadow-md p-4">
+        <div className="bg-white rounded-xl shadow-md p-4 max-w-4xl">
           <div className="flex justify-between items-center mb-3">
             <h2 className="text-lg font-semibold">Volume Negociado (últimos {dias} dias)</h2>
             <div className="space-x-2">
@@ -101,12 +99,10 @@ export default function Painel() {
           <div className="overflow-x-auto">
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={dadosFiltrados}>
-                <XAxis dataKey="data" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                <XAxis dataKey="data" tick={{ fontSize: 12 }} />
                 <YAxis
                   tickFormatter={(v) => `R$ ${v.toLocaleString('pt-BR')}`}
                   tick={{ fontSize: 12 }}
-                  axisLine={false}
-                  tickLine={false}
                 />
                 <Tooltip
                   formatter={(value: number) =>
