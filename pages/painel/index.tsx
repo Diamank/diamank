@@ -1,152 +1,124 @@
-import { useState, useEffect } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/router'
 import {
-  FileText,
-  ScrollText,
-  Folder,
   DollarSign,
+  FileText,
   Landmark,
-  Banknote,
-  Home
 } from 'lucide-react'
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer
-} from 'recharts'
+import { useEffect, useState } from 'react'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import { useUser } from '@/contexts/UserContext'
+import { supabase } from '@/lib/supabase'
 
-export default function Painel() {
-  const router = useRouter()
-  const [dias, setDias] = useState(30)
-  const [dadosFixos, setDadosFixos] = useState<any[]>([])
+export default function PainelPage() {
+  const { user } = useUser()
+  const [quantidadeNotas, setQuantidadeNotas] = useState(0)
+  const [volumeNegociado, setVolumeNegociado] = useState(0)
+  const [graficoData, setGraficoData] = useState([])
+  const [diasFiltro, setDiasFiltro] = useState(30)
+  const [ultimaNegociacao, setUltimaNegociacao] = useState<Date | null>(null)
 
   useEffect(() => {
-    const hoje = new Date()
-    const gerados = Array.from({ length: 30 }, (_, i) => {
-      const d = new Date(hoje)
-      d.setDate(d.getDate() - (29 - i))
-      return {
-        data: d.toLocaleDateString('pt-BR'),
-        valor: Math.round(Math.random() * 5000),
-        quantidade: Math.round(Math.random() * 5),
-      }
-    })
-    setDadosFixos(gerados)
-  }, [])
+    carregarDados()
+  }, [user, diasFiltro])
 
-  const dadosFiltrados = dadosFixos.slice(-dias)
-  const totalNotas = dadosFixos.reduce((soma, item) => soma + item.quantidade, 0)
-  const totalValor = dadosFixos.reduce((soma, item) => soma + item.valor, 0)
-  const ultimaData = dadosFixos[dadosFixos.length - 1]?.data
+  async function carregarDados() {
+    if (!user) return
+
+    const { data, error } = await supabase
+      .from('notas_fiscais')
+      .select('valor, data_emissao')
+      .eq('user_id', user.id)
+      .order('data_emissao', { ascending: true })
+
+    if (error || !data) return
+
+    setQuantidadeNotas(data.length)
+    setVolumeNegociado(data.reduce((acc, cur) => acc + cur.valor, 0))
+
+    if (data.length > 0) {
+      const datasFiltradas = data.filter(item => {
+        const dataEmissao = new Date(item.data_emissao)
+        const dataLimite = new Date()
+        dataLimite.setDate(dataLimite.getDate() - diasFiltro)
+        return dataEmissao >= dataLimite
+      })
+
+      const agrupado = datasFiltradas.reduce((acc, nota) => {
+        const dataFormatada = format(new Date(nota.data_emissao), 'dd/MM/yyyy')
+        acc[dataFormatada] = (acc[dataFormatada] || 0) + nota.valor
+        return acc
+      }, {} as Record<string, number>)
+
+      const arrayGrafico = Object.entries(agrupado).map(([data, valor]) => ({ data, valor }))
+      setGraficoData(arrayGrafico)
+      setUltimaNegociacao(new Date(data[data.length - 1].data_emissao))
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex font-sans text-neutral-800">
-      {/* Menu lateral ajustado */}
-      <aside className="w-28 bg-white shadow-lg py-6 flex flex-col items-center space-y-6">
-        <MenuIcon href="/painel" icon={<Home size={24} />} label="Início" active={router.pathname === '/painel'} />
-        <MenuIcon href="/painel/notas" icon={<FileText size={24} />} label="Notas" active={router.pathname === '/painel/notas'} />
-        <MenuIcon href="/painel/contratos" icon={<ScrollText size={24} />} label="Contratos" active={router.pathname === '/painel/contratos'} />
-        <MenuIcon href="/painel/documentos" icon={<Folder size={24} />} label="Documentos" active={router.pathname === '/painel/documentos'} />
-        <MenuIcon href="/painel/movimentacoes" icon={<DollarSign size={24} />} label="Movimentos" active={router.pathname === '/painel/movimentacoes'} />
-        <MenuIcon href="/painel/boletos" icon={<Banknote size={24} />} label="Boletos" active={router.pathname === '/painel/boletos'} />
-        <MenuIcon href="/painel/bancario" icon={<Landmark size={24} />} label="Bancário" active={router.pathname === '/painel/bancario'} />
-      </aside>
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-xl font-semibold">Olá, {user?.email}</h1>
+        <button className="text-sm text-blue-600 hover:underline">Sair</button>
+      </div>
 
-      {/* Conteúdo */}
-      <main className="flex-1 p-6">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-2xl font-bold mb-6">Olá, teste@cedente.com</h1>
-
-          {/* Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div className="bg-black rounded-xl p-6 shadow-md text-center text-white">
-              <h2 className="text-sm font-medium mb-1">Notas Negociadas</h2>
-              <p className="text-3xl font-bold">{totalNotas}</p>
-            </div>
-            <div className="bg-black rounded-xl p-6 shadow-md text-center text-white">
-              <h2 className="text-sm font-medium mb-1">Volume Negociado</h2>
-              <p className="text-3xl font-bold">
-                R$ {totalValor.toLocaleString('pt-BR')}
-              </p>
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-6xl mx-auto mb-4">
+        <div className="bg-gradient-to-r from-slate-800 to-slate-900 text-white p-5 rounded-xl shadow flex items-center justify-between">
+          <div>
+            <h3 className="text-sm opacity-70">Notas Negociadas</h3>
+            <p className="text-3xl font-bold">{quantidadeNotas}</p>
           </div>
+          <FileText className="w-8 h-8 opacity-40" />
+        </div>
 
-          {/* Última negociação */}
-          <p className="text-sm text-gray-500 mb-4">Última negociação: {ultimaData}</p>
+        <div className="bg-gradient-to-r from-blue-800 to-blue-900 text-white p-5 rounded-xl shadow flex items-center justify-between">
+          <div>
+            <h3 className="text-sm opacity-70">Volume Negociado</h3>
+            <p className="text-3xl font-bold">R$ {volumeNegociado.toLocaleString('pt-BR')}</p>
+          </div>
+          <DollarSign className="w-8 h-8 opacity-40" />
+        </div>
+      </div>
 
-          {/* Gráfico */}
-          <div className="bg-white rounded-xl shadow-md p-4">
-            <div className="flex justify-between items-center mb-3">
-              <h2 className="text-lg font-semibold">Volume Negociado (últimos {dias} dias)</h2>
-              <div className="space-x-2">
-                {[7, 15, 30].map((num) => (
-                  <button
-                    key={num}
-                    onClick={() => setDias(num)}
-                    className={`px-3 py-1 rounded-full text-sm font-medium border ${
-                      dias === num ? 'bg-black text-white' : 'bg-gray-100 text-gray-700'
-                    }`}
-                  >
-                    {num} dias
-                  </button>
-                ))}
-              </div>
-            </div>
+      {ultimaNegociacao && (
+        <p className="text-sm text-gray-600 mb-2 ml-2">
+          Última negociação: {format(ultimaNegociacao, 'dd/MM/yyyy', { locale: ptBR })}
+        </p>
+      )}
 
-            <div className="overflow-x-auto">
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={dadosFiltrados}>
-                  <XAxis dataKey="data" tick={{ fontSize: 12 }} />
-                  <YAxis
-                    tickFormatter={(v) => `R$ ${v.toLocaleString('pt-BR')}`}
-                    tick={{ fontSize: 12 }}
-                  />
-                  <Tooltip
-                    formatter={(value: number) =>
-                      [`R$ ${value.toLocaleString('pt-BR')}`, 'Volume']
-                    }
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="valor"
-                    stroke="#2563eb"
-                    strokeWidth={3}
-                    dot={{ r: 4 }}
-                    activeDot={{ r: 6 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+      <div className="bg-white p-6 rounded-xl shadow max-w-6xl mx-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-medium">Volume Negociado (últimos {diasFiltro} dias)</h2>
+          <div className="space-x-2">
+            {[7, 15, 30].map(d => (
+              <button
+                key={d}
+                onClick={() => setDiasFiltro(d)}
+                className={`px-3 py-1 rounded-full text-sm ${diasFiltro === d ? 'bg-black text-white' : 'bg-gray-100 text-gray-800'}`}
+              >
+                {d} dias
+              </button>
+            ))}
           </div>
         </div>
-      </main>
-    </div>
-  )
-}
 
-function MenuIcon({
-  href,
-  icon,
-  label,
-  active,
-}: {
-  href: string
-  icon: React.ReactNode
-  label: string
-  active: boolean
-}) {
-  return (
-    <Link href={href} className="flex flex-col items-center text-center group w-full">
-      <div className={`text-gray-600 group-hover:text-blue-600 ${active ? 'text-blue-600' : ''}`}>
-        {icon}
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={graficoData}>
+            <XAxis dataKey="data" fontSize={12} tick={{ fill: '#888' }} />
+            <YAxis fontSize={12} tick={{ fill: '#888' }} tickFormatter={(value) => `R$ ${value.toLocaleString('pt-BR')}`} />
+            <Tooltip formatter={(value: number) => `R$ ${value.toLocaleString('pt-BR')}`} />
+            <Line
+              type="monotone"
+              dataKey="valor"
+              stroke="#3b82f6"
+              strokeWidth={2.5}
+              dot={{ r: 3 }}
+              activeDot={{ r: 6 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
-      <span className={`text-xs mt-1 break-words ${active ? 'text-blue-600 font-semibold' : 'text-gray-500'}`}>
-        {label}
-      </span>
-    </Link>
+    </div>
   )
 }
