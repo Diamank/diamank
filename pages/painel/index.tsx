@@ -20,7 +20,7 @@ export default function PainelHome() {
   }, [dias]);
 
   const carregarResumo = async () => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("notas")
       .select("valor, created_at");
 
