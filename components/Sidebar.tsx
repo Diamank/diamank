@@ -24,9 +24,9 @@ export default function Sidebar() {
   const router = useRouter();
 
   return (
-    <aside className="w-64 h-screen bg-white border-r shadow-sm fixed left-0 top-0">
+    <aside className="w-64 h-screen bg-white border-r shadow-sm fixed top-0 left-0 overflow-y-auto">
       <div className="p-6 font-bold text-xl">Securitizadora</div>
-      <nav className="flex flex-col space-y-1 px-4">
+      <nav className="flex flex-col space-y-1 px-4 pb-6">
         {menu.map((item) => (
           <Link key={item.href} href={item.href}>
             <div
