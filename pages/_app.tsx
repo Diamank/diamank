@@ -1,7 +1,6 @@
-// pages/_app.tsx
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
-import { ReactElement, ReactNode } from "react";
+import type { ReactNode, ReactElement } from "react";
 import type { NextPage } from "next";
 
 type NextPageWithLayout = NextPage & {
