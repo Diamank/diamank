@@ -88,8 +88,8 @@ export default function Movimentacoes() {
           </thead>
           <tbody>
             {movimentacoesFiltradas.map((m, idx) => (
-              <>
-                <tr key={idx} className="border-t hover:bg-gray-50 transition">
+              <React.Fragment key={idx}>
+                <tr className="border-t hover:bg-gray-50 transition">
                   <td className="p-2">{m.nota}</td>
                   <td className="p-2">
                     R$ {m.valorNota.toFixed(2).replace(".", ",")}
@@ -98,3 +98,49 @@ export default function Movimentacoes() {
                     R$ {m.valorAntecipado.toFixed(2).replace(".", ",")}
                   </td>
                   <td className="p-2">{m.taxa}%</td>
+                  <td className="p-2">{m.ddl} DDL</td>
+                  <td className="p-2">
+                    {new Date(m.data).toLocaleDateString("pt-BR")}
+                  </td>
+                  <td
+                    className="p-2 cursor-pointer"
+                    onClick={() => setAberta(aberta === idx ? null : idx)}
+                  >
+                    {aberta === idx ? <FaChevronUp /> : <FaChevronDown />}
+                  </td>
+                </tr>
+
+                {aberta === idx && (
+                  <tr className="bg-gray-50 border-t">
+                    <td colSpan={7} className="p-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <ArquivoLink nome="Boleto" url={m.arquivos.boleto} />
+                        <ArquivoLink nome="Nota Fiscal" url={m.arquivos.notaFiscal} />
+                        <ArquivoLink nome="Contrato Aditivo" url={m.arquivos.contrato} />
+                        <ArquivoLink nome="Borderô" url={m.arquivos.bordero} />
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function ArquivoLink({ nome, url }: { nome: string; url: string }) {
+  return (
+    <a
+      href={url}
+      target="_blank"
+      className="flex items-center gap-2 text-blue-600 hover:underline"
+      rel="noreferrer"
+    >
+      <FaFilePdf className="text-red-600" />
+      {nome}
+    </a>
+  );
+}
