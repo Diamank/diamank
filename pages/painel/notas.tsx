@@ -39,6 +39,17 @@ export default function Notas() {
 
   const handleUpload = (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (xml && !pdf) {
+      alert("Você não pode enviar um XML sem o PDF correspondente.")
+      return
+    }
+
+    if (!xml && !pdf) {
+      alert("Envie ao menos o PDF da nota.")
+      return
+    }
+
     alert('Upload simulado - aqui faremos a integração com Supabase Storage e a criação no banco.')
   }
 
@@ -55,7 +66,6 @@ export default function Notas() {
               accept=".xml"
               onChange={handleXmlChange}
               className="w-full border rounded-lg px-3 py-2"
-              required
             />
           </div>
           <div>
@@ -65,7 +75,6 @@ export default function Notas() {
               accept=".pdf"
               onChange={(e) => setPdf(e.target.files?.[0] || null)}
               className="w-full border rounded-lg px-3 py-2"
-              required
             />
           </div>
 
