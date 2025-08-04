@@ -134,4 +134,60 @@ export default function Movimentacoes() {
           <thead>
             <tr className="bg-gray-100 text-left cursor-pointer">
               <th className="p-2" onClick={() => handleOrdenar("nota")}>Nota {seta("nota")}</th>
-              <th className="p-2" onClick={() => handleOrd
+              <th className="p-2" onClick={() => handleOrdenar("valorNota")}>Valor da Nota {seta("valorNota")}</th>
+              <th className="p-2" onClick={() => handleOrdenar("valorAntecipado")}>Valor Antecipado {seta("valorAntecipado")}</th>
+              <th className="p-2" onClick={() => handleOrdenar("taxa")}>Taxa (%) {seta("taxa")}</th>
+              <th className="p-2" onClick={() => handleOrdenar("ddl")}>DDL {seta("ddl")}</th>
+              <th className="p-2" onClick={() => handleOrdenar("data")}>Data {seta("data")}</th>
+              <th className="p-2">Ver</th>
+            </tr>
+          </thead>
+          <tbody>
+            {movimentacoesFiltradas.map((m, idx) => (
+              <>
+                <tr key={idx} className="border-t hover:bg-gray-50 transition">
+                  <td className="p-2">{m.nota}</td>
+                  <td className="p-2">R$ {m.valorNota.toFixed(2).replace(".", ",")}</td>
+                  <td className="p-2 text-green-700 font-medium">R$ {m.valorAntecipado.toFixed(2).replace(".", ",")}</td>
+                  <td className="p-2">{m.taxa}%</td>
+                  <td className="p-2">{m.ddl} DDL</td>
+                  <td className="p-2">{new Date(m.data).toLocaleDateString("pt-BR")}</td>
+                  <td className="p-2 cursor-pointer" onClick={() => setAberta(aberta === idx ? null : idx)}>
+                    {aberta === idx ? <FaChevronUp /> : <FaChevronDown />}
+                  </td>
+                </tr>
+
+                {aberta === idx && (
+                  <tr className="bg-gray-50 border-t">
+                    <td colSpan={7} className="p-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <ArquivoLink nome="Boleto" url={m.arquivos.boleto} />
+                        <ArquivoLink nome="Nota Fiscal" url={m.arquivos.notaFiscal} />
+                        <ArquivoLink nome="Contrato Aditivo" url={m.arquivos.contrato} />
+                        <ArquivoLink nome="Borderô" url={m.arquivos.bordero} />
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function ArquivoLink({ nome, url }: { nome: string; url: string }) {
+  return (
+    <a
+      href={url}
+      target="_blank"
+      className="flex items-center gap-2 text-blue-600 hover:underline"
+      rel="noreferrer"
+    >
+      <FaFilePdf className="text-red-600" />
+      {nome}
+    </a>
+  );
+}
