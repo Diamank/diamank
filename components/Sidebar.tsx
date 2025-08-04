@@ -14,10 +14,8 @@ const menu = [
   { href: "/painel", label: "Início", icon: <Home size={20} /> },
   { href: "/painel/notas", label: "Notas", icon: <FileText size={20} /> },
   { href: "/painel/contratos", label: "Contratos", icon: <Folder size={20} /> },
-  { href: "/painel/documentos", label: "Documentos", icon: <File size={20} /> },
   { href: "/painel/movimentacoes", label: "Movimentos", icon: <DollarSign size={20} /> },
-  { href: "/painel/boletos", label: "Boletos", icon: <CreditCard size={20} /> },
-  { href: "/painel/banco", label: "Bancário", icon: <Banknote size={20} /> }
+
 ];
 
 export default function Sidebar() {
