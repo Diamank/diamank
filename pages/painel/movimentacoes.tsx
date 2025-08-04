@@ -1,22 +1,39 @@
+import { useState } from "react";
+import { FaFilePdf, FaChevronDown, FaChevronUp } from "react-icons/fa";
+
 export default function Movimentacoes() {
   const movimentacoes = [
     {
-      nota: 'NF #123',
-      valorNota: 3000.00,
-      valorAntecipado: 2500.00,
+      nota: "NF #123",
+      valorNota: 3000.0,
+      valorAntecipado: 2500.0,
       taxa: 16.7,
       ddl: 30,
-      data: '25/06/2025'
+      data: "25/06/2025",
+      arquivos: {
+        boleto: "/arquivos/nf123-boleto.pdf",
+        notaFiscal: "/arquivos/nf123-nota-fiscal.pdf",
+        contrato: "/arquivos/nf123-contrato.pdf",
+        bordero: "/arquivos/nf123-bordero.pdf",
+      },
     },
     {
-      nota: 'NF #124',
-      valorNota: 2000.00,
-      valorAntecipado: 1800.00,
+      nota: "NF #124",
+      valorNota: 2000.0,
+      valorAntecipado: 1800.0,
       taxa: 10.0,
       ddl: 20,
-      data: '20/06/2025'
-    }
-  ]
+      data: "20/06/2025",
+      arquivos: {
+        boleto: "/arquivos/nf124-boleto.pdf",
+        notaFiscal: "/arquivos/nf124-nota-fiscal.pdf",
+        contrato: "/arquivos/nf124-contrato.pdf",
+        bordero: "/arquivos/nf124-bordero.pdf",
+      },
+    },
+  ];
+
+  const [aberta, setAberta] = useState<number | null>(null);
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -32,22 +49,59 @@ export default function Movimentacoes() {
               <th className="p-2">Taxa (%)</th>
               <th className="p-2">DDL</th>
               <th className="p-2">Data</th>
+              <th className="p-2">Ver</th>
             </tr>
           </thead>
           <tbody>
             {movimentacoes.map((m, idx) => (
-              <tr key={idx} className="border-t">
-                <td className="p-2">{m.nota}</td>
-                <td className="p-2">R$ {m.valorNota.toFixed(2).replace('.', ',')}</td>
-                <td className="p-2 text-green-700 font-medium">R$ {m.valorAntecipado.toFixed(2).replace('.', ',')}</td>
-                <td className="p-2">{m.taxa}%</td>
-                <td className="p-2">{m.ddl} DDL</td>
-                <td className="p-2">{m.data}</td>
-              </tr>
+              <>
+                <tr key={idx} className="border-t hover:bg-gray-50 transition">
+                  <td className="p-2">{m.nota}</td>
+                  <td className="p-2">
+                    R$ {m.valorNota.toFixed(2).replace(".", ",")}
+                  </td>
+                  <td className="p-2 text-green-700 font-medium">
+                    R$ {m.valorAntecipado.toFixed(2).replace(".", ",")}
+                  </td>
+                  <td className="p-2">{m.taxa}%</td>
+                  <td className="p-2">{m.ddl} DDL</td>
+                  <td className="p-2">{m.data}</td>
+                  <td className="p-2 cursor-pointer" onClick={() => setAberta(aberta === idx ? null : idx)}>
+                    {aberta === idx ? <FaChevronUp /> : <FaChevronDown />}
+                  </td>
+                </tr>
+
+                {aberta === idx && (
+                  <tr className="bg-gray-50 border-t">
+                    <td colSpan={7} className="p-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <ArquivoLink nome="Boleto" url={m.arquivos.boleto} />
+                        <ArquivoLink nome="Nota Fiscal" url={m.arquivos.notaFiscal} />
+                        <ArquivoLink nome="Contrato Aditivo" url={m.arquivos.contrato} />
+                        <ArquivoLink nome="Borderô" url={m.arquivos.bordero} />
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </>
             ))}
           </tbody>
         </table>
       </div>
     </div>
-  )
+  );
+}
+
+function ArquivoLink({ nome, url }: { nome: string; url: string }) {
+  return (
+    <a
+      href={url}
+      target="_blank"
+      className="flex items-center gap-2 text-blue-600 hover:underline"
+      rel="noreferrer"
+    >
+      <FaFilePdf className="text-red-600" />
+      {nome}
+    </a>
+  );
 }
