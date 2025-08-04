@@ -55,8 +55,7 @@ export default function Movimentacoes() {
 
   const [aberta, setAberta] = useState<number | null>(null);
   const [filtroNota, setFiltroNota] = useState("");
-  const [dataMin, setDataMin] = useState("");
-  const [dataMax, setDataMax] = useState("");
+  const [valorMinimo, setValorMinimo] = useState("");
   const [colunaOrdenada, setColunaOrdenada] = useState<ColunaOrdenavel | null>(null);
   const [ordemAsc, setOrdemAsc] = useState(true);
 
@@ -84,10 +83,12 @@ export default function Movimentacoes() {
 
   const movimentacoesFiltradas = ordenar(
     movimentacoesOriginais.filter((m) => {
-      const matchNota = m.nota.toLowerCase().includes(filtroNota.toLowerCase());
-      const matchDataMin = !dataMin || m.data >= dataMin;
-      const matchDataMax = !dataMax || m.data <= dataMax;
-      return matchNota && matchDataMin && matchDataMax;
+      const notaMatch = m.nota.toLowerCase().includes(filtroNota.toLowerCase());
+      const valorMatch =
+        !valorMinimo ||
+        m.valorNota >= parseFloat(valorMinimo) ||
+        m.valorAntecipado >= parseFloat(valorMinimo);
+      return notaMatch && valorMatch;
     })
   );
 
@@ -108,28 +109,25 @@ export default function Movimentacoes() {
       <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-md p-6">
         <h1 className="text-2xl font-bold mb-4">Movimentações Financeiras</h1>
 
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        {/* Filtros: nota + valor */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           <input
             type="text"
             placeholder="Filtrar por nota..."
             value={filtroNota}
             onChange={(e) => setFiltroNota(e.target.value)}
-            className="border rounded-md px-3 py-2 w-full sm:w-1/3"
+            className="border rounded-md px-3 py-2"
           />
           <input
-            type="date"
-            value={dataMin}
-            onChange={(e) => setDataMin(e.target.value)}
-            className="border rounded-md px-3 py-2 w-full sm:w-1/3"
-          />
-          <input
-            type="date"
-            value={dataMax}
-            onChange={(e) => setDataMax(e.target.value)}
-            className="border rounded-md px-3 py-2 w-full sm:w-1/3"
+            type="number"
+            placeholder="Valor mínimo (R$)"
+            value={valorMinimo}
+            onChange={(e) => setValorMinimo(e.target.value)}
+            className="border rounded-md px-3 py-2"
           />
         </div>
 
+        {/* Tabela */}
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-gray-100 text-left cursor-pointer">
