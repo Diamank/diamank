@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import toast from 'react-hot-toast'
 
 export default function Notas() {
   const [xml, setXml] = useState<File | null>(null)
@@ -41,16 +42,16 @@ export default function Notas() {
     e.preventDefault()
 
     if (xml && !pdf) {
-      alert("Você não pode enviar um XML sem o PDF correspondente.")
+      toast.error("Você não pode enviar um XML sem o PDF correspondente.")
       return
     }
 
     if (!xml && !pdf) {
-      alert("Envie ao menos o PDF da nota.")
+      toast.error("Envie ao menos o PDF da nota.")
       return
     }
 
-    alert('Upload simulado - aqui faremos a integração com Supabase Storage e a criação no banco.')
+    toast.success("Nota enviada com sucesso (simulado)!")
   }
 
   return (
