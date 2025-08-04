@@ -50,7 +50,6 @@ export default function Movimentacoes() {
       <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-md p-6">
         <h1 className="text-2xl font-bold mb-4">Movimentações Financeiras</h1>
 
-        {/* Filtros */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <input
             type="text"
@@ -73,7 +72,6 @@ export default function Movimentacoes() {
           />
         </div>
 
-        {/* Tabela */}
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-gray-100 text-left">
@@ -88,8 +86,8 @@ export default function Movimentacoes() {
           </thead>
           <tbody>
             {movimentacoesFiltradas.map((m, idx) => (
-              <React.Fragment key={idx}>
-                <tr className="border-t hover:bg-gray-50 transition">
+              <>
+                <tr key={idx} className="border-t hover:bg-gray-50 transition">
                   <td className="p-2">{m.nota}</td>
                   <td className="p-2">
                     R$ {m.valorNota.toFixed(2).replace(".", ",")}
@@ -122,25 +120,7 @@ export default function Movimentacoes() {
                     </td>
                   </tr>
                 )}
-              </React.Fragment>
+              </>
             ))}
           </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-function ArquivoLink({ nome, url }: { nome: string; url: string }) {
-  return (
-    <a
-      href={url}
-      target="_blank"
-      className="flex items-center gap-2 text-blue-600 hover:underline"
-      rel="noreferrer"
-    >
-      <FaFilePdf className="text-red-600" />
-      {nome}
-    </a>
-  );
-}
+        </
