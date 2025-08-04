@@ -118,16 +118,6 @@ export default function Notas() {
             </>
           )}
 
-          {xmlPreview && !xmlPreview.vencimento && (
-            <input
-              type="date"
-              className="w-full border rounded-lg px-3 py-2"
-              value={manualData.vencimento}
-              onChange={(e) => setManualData({ ...manualData, vencimento: e.target.value })}
-              required
-            />
-          )}
-
           {xmlPreview && (
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-800">
               <p><strong>Emitente:</strong> {xmlPreview.emitente}</p>
@@ -135,7 +125,20 @@ export default function Notas() {
               <p><strong>CNPJ:</strong> {xmlPreview.cnpj}</p>
               <p><strong>Nota Nº:</strong> {xmlPreview.numero}</p>
               <p><strong>Valor:</strong> R$ {Number(xmlPreview.valor).toFixed(2)}</p>
-              <p><strong>Vencimento:</strong> {xmlPreview.vencimento ? format(new Date(xmlPreview.vencimento), 'dd/MM/yyyy') : manualData.vencimento}</p>
+              <p className="flex items-center gap-2">
+                <strong>Vencimento:</strong>
+                {xmlPreview.vencimento ? (
+                  format(new Date(xmlPreview.vencimento), 'dd/MM/yyyy')
+                ) : (
+                  <input
+                    type="date"
+                    className="border rounded-lg px-2 py-1 text-sm"
+                    value={manualData.vencimento}
+                    onChange={(e) => setManualData({ ...manualData, vencimento: e.target.value })}
+                    required
+                  />
+                )}
+              </p>
               <p><strong>Chave:</strong> {xmlPreview.chave}</p>
             </div>
           )}
