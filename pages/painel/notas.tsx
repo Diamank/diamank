@@ -1,17 +1,17 @@
 import { useState } from 'react'
-import toast, { Toaster } from 'react-hot-toast'
+import { toast } from 'sonner'
+import { format } from 'date-fns'
 
 export default function Notas() {
   const [xml, setXml] = useState<File | null>(null)
   const [pdf, setPdf] = useState<File | null>(null)
   const [xmlPreview, setXmlPreview] = useState<any>(null)
-  const [formData, setFormData] = useState<any>({ destinatario: '', valor: '', vencimento: '' })
-  const [notas, setNotas] = useState<any[]>([])
+  const [manualData, setManualData] = useState({ destinatario: '', valor: '', vencimento: '' })
+  const [historico, setHistorico] = useState<any[]>([])
 
   const handleXmlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-
     setXml(file)
 
     const reader = new FileReader()
@@ -26,7 +26,7 @@ export default function Notas() {
       const numero = xmlDoc.getElementsByTagName("nNF")[0]
       const chave = xmlDoc.getElementsByTagName("infNFe")[0]?.getAttribute("Id")?.slice(3)
 
-      const preview = {
+      setXmlPreview({
         emitente: emit?.getElementsByTagName("xNome")[0]?.textContent,
         destinatario: dest?.getElementsByTagName("xNome")[0]?.textContent,
         cnpj: dest?.getElementsByTagName("CNPJ")[0]?.textContent,
@@ -34,38 +34,33 @@ export default function Notas() {
         vencimento: venc?.textContent,
         numero: numero?.textContent,
         chave
-      }
-
-      setXmlPreview(preview)
-      if (!venc) {
-        setFormData((prev: any) => ({ ...prev, vencimento: '' }))
-      }
+      })
     }
+
     reader.readAsText(file)
   }
 
   const handleUpload = (e: React.FormEvent) => {
     e.preventDefault()
 
-    const nota = {
-      sacado: xmlPreview?.destinatario || formData.destinatario,
-      valor: xmlPreview?.valor || formData.valor,
-      vencimento: xmlPreview?.vencimento || formData.vencimento,
+    let novoItem = {
+      sacado: xmlPreview?.destinatario || manualData.destinatario,
+      valor: xmlPreview?.valor || manualData.valor,
+      vencimento: xmlPreview?.vencimento || manualData.vencimento,
       status: 'Pendente'
     }
 
-    setNotas((prev) => [...prev, nota])
+    setHistorico(prev => [...prev, novoItem])
     toast.success('Nota enviada com sucesso!')
 
     setXml(null)
     setPdf(null)
     setXmlPreview(null)
-    setFormData({ destinatario: '', valor: '', vencimento: '' })
+    setManualData({ destinatario: '', valor: '', vencimento: '' })
   }
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <Toaster position="top-right" />
       <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-md p-6">
         <h1 className="text-2xl font-bold mb-4">Notas Fiscais</h1>
 
@@ -89,33 +84,42 @@ export default function Notas() {
             />
           </div>
 
-          {!xml && pdf && (
+          {!xmlPreview && pdf && (
             <>
               <input
                 type="text"
                 placeholder="Destinatário"
                 className="w-full border rounded-lg px-3 py-2"
-                value={formData.destinatario}
-                onChange={(e) => setFormData({ ...formData, destinatario: e.target.value })}
+                value={manualData.destinatario}
+                onChange={(e) => setManualData({ ...manualData, destinatario: e.target.value })}
                 required
               />
               <input
-                type="number"
-                placeholder="Valor"
+                type="text"
+                placeholder="Valor (R$)"
                 className="w-full border rounded-lg px-3 py-2"
-                value={formData.valor}
-                onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
+                value={manualData.valor}
+                onChange={(e) => setManualData({ ...manualData, valor: e.target.value })}
                 required
               />
               <input
                 type="date"
-                placeholder="Vencimento"
                 className="w-full border rounded-lg px-3 py-2"
-                value={formData.vencimento}
-                onChange={(e) => setFormData({ ...formData, vencimento: e.target.value })}
+                value={manualData.vencimento}
+                onChange={(e) => setManualData({ ...manualData, vencimento: e.target.value })}
                 required
               />
             </>
+          )}
+
+          {xmlPreview && !xmlPreview.vencimento && (
+            <input
+              type="date"
+              className="w-full border rounded-lg px-3 py-2"
+              value={manualData.vencimento}
+              onChange={(e) => setManualData({ ...manualData, vencimento: e.target.value })}
+              required
+            />
           )}
 
           {xmlPreview && (
@@ -125,15 +129,7 @@ export default function Notas() {
               <p><strong>CNPJ:</strong> {xmlPreview.cnpj}</p>
               <p><strong>Nota Nº:</strong> {xmlPreview.numero}</p>
               <p><strong>Valor:</strong> R$ {Number(xmlPreview.valor).toFixed(2)}</p>
-              <p><strong>Vencimento:</strong> {xmlPreview.vencimento || (
-                <input
-                  type="date"
-                  className="border rounded px-2 py-1"
-                  value={formData.vencimento}
-                  onChange={(e) => setFormData({ ...formData, vencimento: e.target.value })}
-                  required
-                />
-              )}</p>
+              <p><strong>Vencimento:</strong> {xmlPreview.vencimento ? format(new Date(xmlPreview.vencimento), 'dd/MM/yyyy') : manualData.vencimento}</p>
               <p><strong>Chave:</strong> {xmlPreview.chave}</p>
             </div>
           )}
@@ -141,7 +137,6 @@ export default function Notas() {
           <button
             type="submit"
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-            disabled={!pdf && !xml}
           >
             Enviar Nota
           </button>
@@ -159,12 +154,12 @@ export default function Notas() {
               </tr>
             </thead>
             <tbody>
-              {notas.map((n, i) => (
+              {historico.map((nota, i) => (
                 <tr key={i} className="border-t">
-                  <td className="p-2">{n.sacado}</td>
-                  <td className="p-2">R$ {Number(n.valor).toFixed(2)}</td>
-                  <td className="p-2">{n.vencimento}</td>
-                  <td className="p-2 text-yellow-600 font-semibold">{n.status}</td>
+                  <td className="p-2">{nota.sacado}</td>
+                  <td className="p-2">R$ {Number(nota.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                  <td className="p-2">{format(new Date(nota.vencimento), 'dd/MM/yyyy')}</td>
+                  <td className="p-2 text-yellow-600 font-semibold">{nota.status}</td>
                 </tr>
               ))}
             </tbody>
