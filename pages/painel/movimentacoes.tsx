@@ -7,7 +7,7 @@ type Movimentacao = {
   valorAntecipado: number;
   taxa: number;
   ddl: number;
-  data: string;
+  data: string; // formato ISO: "2025-06-25"
   arquivos: {
     boleto: string;
     notaFiscal: string;
@@ -56,6 +56,7 @@ export default function Movimentacoes() {
   const [aberta, setAberta] = useState<number | null>(null);
   const [filtroNota, setFiltroNota] = useState("");
   const [valorMinimo, setValorMinimo] = useState("");
+  const [filtroData, setFiltroData] = useState("");
   const [colunaOrdenada, setColunaOrdenada] = useState<ColunaOrdenavel | null>(null);
   const [ordemAsc, setOrdemAsc] = useState(true);
 
@@ -88,7 +89,8 @@ export default function Movimentacoes() {
         !valorMinimo ||
         m.valorNota >= parseFloat(valorMinimo) ||
         m.valorAntecipado >= parseFloat(valorMinimo);
-      return notaMatch && valorMatch;
+      const dataMatch = !filtroData || m.data === filtroData;
+      return notaMatch && valorMatch && dataMatch;
     })
   );
 
@@ -109,8 +111,8 @@ export default function Movimentacoes() {
       <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-md p-6">
         <h1 className="text-2xl font-bold mb-4">Movimentações Financeiras</h1>
 
-        {/* Filtros: nota + valor */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        {/* Filtros: nota + valor + data */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           <input
             type="text"
             placeholder="Filtrar por nota..."
@@ -123,6 +125,12 @@ export default function Movimentacoes() {
             placeholder="Valor mínimo (R$)"
             value={valorMinimo}
             onChange={(e) => setValorMinimo(e.target.value)}
+            className="border rounded-md px-3 py-2"
+          />
+          <input
+            type="date"
+            value={filtroData}
+            onChange={(e) => setFiltroData(e.target.value)}
             className="border rounded-md px-3 py-2"
           />
         </div>
