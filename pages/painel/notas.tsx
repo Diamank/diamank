@@ -3,6 +3,39 @@ import { useState } from 'react'
 export default function Notas() {
   const [xml, setXml] = useState<File | null>(null)
   const [pdf, setPdf] = useState<File | null>(null)
+  const [xmlPreview, setXmlPreview] = useState<any>(null)
+
+  const handleXmlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setXml(file)
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      const parser = new DOMParser()
+      const xmlDoc = parser.parseFromString(reader.result as string, 'text/xml')
+
+      const emit = xmlDoc.getElementsByTagName("emit")[0]
+      const dest = xmlDoc.getElementsByTagName("dest")[0]
+      const total = xmlDoc.getElementsByTagName("vNF")[0]
+      const venc = xmlDoc.getElementsByTagName("venc")[0]
+      const numero = xmlDoc.getElementsByTagName("nNF")[0]
+      const chave = xmlDoc.getElementsByTagName("infNFe")[0]?.getAttribute("Id")?.slice(3)
+
+      setXmlPreview({
+        emitente: emit?.getElementsByTagName("xNome")[0]?.textContent,
+        destinatario: dest?.getElementsByTagName("xNome")[0]?.textContent,
+        cnpj: dest?.getElementsByTagName("CNPJ")[0]?.textContent,
+        valor: total?.textContent,
+        vencimento: venc?.textContent,
+        numero: numero?.textContent,
+        chave
+      })
+    }
+
+    reader.readAsText(file)
+  }
 
   const handleUpload = (e: React.FormEvent) => {
     e.preventDefault()
@@ -20,7 +53,7 @@ export default function Notas() {
             <input
               type="file"
               accept=".xml"
-              onChange={(e) => setXml(e.target.files?.[0] || null)}
+              onChange={handleXmlChange}
               className="w-full border rounded-lg px-3 py-2"
               required
             />
@@ -35,6 +68,18 @@ export default function Notas() {
               required
             />
           </div>
+
+          {xmlPreview && (
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-800">
+              <p><strong>Emitente:</strong> {xmlPreview.emitente}</p>
+              <p><strong>Destinatário:</strong> {xmlPreview.destinatario}</p>
+              <p><strong>CNPJ:</strong> {xmlPreview.cnpj}</p>
+              <p><strong>Nota Nº:</strong> {xmlPreview.numero}</p>
+              <p><strong>Valor:</strong> R$ {Number(xmlPreview.valor).toFixed(2)}</p>
+              <p><strong>Vencimento:</strong> {xmlPreview.vencimento || "—"}</p>
+              <p><strong>Chave:</strong> {xmlPreview.chave}</p>
+            </div>
+          )}
 
           <button
             type="submit"
