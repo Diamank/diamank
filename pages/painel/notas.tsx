@@ -1,28 +1,29 @@
-import { useState } from 'react'
-import toast from 'react-hot-toast'
+import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function Notas() {
-  const [xml, setXml] = useState<File | null>(null)
-  const [pdf, setPdf] = useState<File | null>(null)
-  const [xmlPreview, setXmlPreview] = useState<any>(null)
+  const [xml, setXml] = useState<File | null>(null);
+  const [pdf, setPdf] = useState<File | null>(null);
+  const [xmlPreview, setXmlPreview] = useState<any>(null);
+  const [historico, setHistorico] = useState<any[]>([]);
 
   const handleXmlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    setXml(file)
+    setXml(file);
 
-    const reader = new FileReader()
+    const reader = new FileReader();
     reader.onload = () => {
-      const parser = new DOMParser()
-      const xmlDoc = parser.parseFromString(reader.result as string, 'text/xml')
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(reader.result as string, "text/xml");
 
-      const emit = xmlDoc.getElementsByTagName("emit")[0]
-      const dest = xmlDoc.getElementsByTagName("dest")[0]
-      const total = xmlDoc.getElementsByTagName("vNF")[0]
-      const venc = xmlDoc.getElementsByTagName("venc")[0]
-      const numero = xmlDoc.getElementsByTagName("nNF")[0]
-      const chave = xmlDoc.getElementsByTagName("infNFe")[0]?.getAttribute("Id")?.slice(3)
+      const emit = xmlDoc.getElementsByTagName("emit")[0];
+      const dest = xmlDoc.getElementsByTagName("dest")[0];
+      const total = xmlDoc.getElementsByTagName("vNF")[0];
+      const venc = xmlDoc.getElementsByTagName("venc")[0];
+      const numero = xmlDoc.getElementsByTagName("nNF")[0];
+      const chave = xmlDoc.getElementsByTagName("infNFe")[0]?.getAttribute("Id")?.slice(3);
 
       setXmlPreview({
         emitente: emit?.getElementsByTagName("xNome")[0]?.textContent,
@@ -32,27 +33,44 @@ export default function Notas() {
         vencimento: venc?.textContent,
         numero: numero?.textContent,
         chave
-      })
-    }
+      });
+    };
 
-    reader.readAsText(file)
-  }
+    reader.readAsText(file);
+  };
 
   const handleUpload = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    if (xml && !pdf) {
-      toast.error("Você não pode enviar um XML sem o PDF correspondente.")
-      return
+    if (!pdf) {
+      toast.error("É necessário enviar o PDF da nota.");
+      return;
     }
 
-    if (!xml && !pdf) {
-      toast.error("Envie ao menos o PDF da nota.")
-      return
+    if (!xmlPreview) {
+      toast.error("XML inválido ou não carregado.");
+      return;
     }
 
-    toast.success("Nota enviada com sucesso (simulado)!")
-  }
+    const novaNota = {
+      sacado: xmlPreview.destinatario,
+      valor: Number(xmlPreview.valor).toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+      }),
+      vencimento: xmlPreview.vencimento || "—",
+      status: "Pendente"
+    };
+
+    setHistorico((prev) => [...prev, novaNota]);
+
+    toast.success("Nota enviada com sucesso!");
+
+    // Limpa arquivos e preview após envio
+    setXml(null);
+    setPdf(null);
+    setXmlPreview(null);
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -67,6 +85,7 @@ export default function Notas() {
               accept=".xml"
               onChange={handleXmlChange}
               className="w-full border rounded-lg px-3 py-2"
+              required
             />
           </div>
           <div>
@@ -76,6 +95,7 @@ export default function Notas() {
               accept=".pdf"
               onChange={(e) => setPdf(e.target.files?.[0] || null)}
               className="w-full border rounded-lg px-3 py-2"
+              required
             />
           </div>
 
@@ -111,16 +131,18 @@ export default function Notas() {
               </tr>
             </thead>
             <tbody>
-              <tr className="border-t">
-                <td className="p-2">Empresa XPTO</td>
-                <td className="p-2">R$ 4.500,00</td>
-                <td className="p-2">15/07/2025</td>
-                <td className="p-2 text-yellow-600 font-semibold">Em análise</td>
-              </tr>
+              {historico.map((nota, i) => (
+                <tr key={i} className="border-t">
+                  <td className="p-2">{nota.sacado}</td>
+                  <td className="p-2">{nota.valor}</td>
+                  <td className="p-2">{nota.vencimento}</td>
+                  <td className="p-2 text-yellow-600 font-semibold">{nota.status}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       </div>
     </div>
-  )
+  );
 }
