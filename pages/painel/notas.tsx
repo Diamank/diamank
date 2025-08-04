@@ -40,18 +40,12 @@ export default function Notas() {
     reader.readAsText(file)
   }
 
-  const handleValorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, '')
-    value = (Number(value) / 100).toFixed(2).replace('.', ',')
-    setManualData({ ...manualData, valor: value })
-  }
-
   const handleUpload = (e: React.FormEvent) => {
     e.preventDefault()
 
     let novoItem = {
       sacado: xmlPreview?.destinatario || manualData.destinatario,
-      valor: xmlPreview?.valor || manualData.valor.replace(',', '.'),
+      valor: xmlPreview?.valor || manualData.valor,
       vencimento: xmlPreview?.vencimento || manualData.vencimento,
       status: 'Pendente'
     }
@@ -102,10 +96,10 @@ export default function Notas() {
               />
               <input
                 type="text"
-                placeholder="Valor"
+                placeholder="R$ 0,00"
                 className="w-full border rounded-lg px-3 py-2"
-                value={`R$ ${manualData.valor}`}
-                onChange={handleValorChange}
+                value={manualData.valor}
+                onChange={(e) => setManualData({ ...manualData, valor: e.target.value })}
                 required
               />
               <input
@@ -119,13 +113,16 @@ export default function Notas() {
           )}
 
           {xmlPreview && !xmlPreview.vencimento && (
-            <input
-              type="date"
-              className="w-full border rounded-lg px-3 py-2"
-              value={manualData.vencimento}
-              onChange={(e) => setManualData({ ...manualData, vencimento: e.target.value })}
-              required
-            />
+            <div>
+              <label className="block mb-1 text-sm font-medium text-gray-700">Vencimento</label>
+              <input
+                type="date"
+                className="w-full border rounded-lg px-3 py-2"
+                value={manualData.vencimento}
+                onChange={(e) => setManualData({ ...manualData, vencimento: e.target.value })}
+                required
+              />
+            </div>
           )}
 
           {xmlPreview && (
@@ -135,7 +132,7 @@ export default function Notas() {
               <p><strong>CNPJ:</strong> {xmlPreview.cnpj}</p>
               <p><strong>Nota Nº:</strong> {xmlPreview.numero}</p>
               <p><strong>Valor:</strong> R$ {Number(xmlPreview.valor).toFixed(2)}</p>
-              <p><strong>Vencimento:</strong> {xmlPreview.vencimento ? format(new Date(xmlPreview.vencimento), 'dd/MM/yyyy') : manualData.vencimento}</p>
+              <p><strong>Vencimento:</strong> {xmlPreview.vencimento ? format(new Date(xmlPreview.vencimento), 'dd/MM/yyyy') : format(new Date(manualData.vencimento), 'dd/MM/yyyy')}</p>
               <p><strong>Chave:</strong> {xmlPreview.chave}</p>
             </div>
           )}
