@@ -17,7 +17,8 @@
     "react-dom": "18.2.0",
     "recharts": "^2.8.0",
     "sonner": "^1.4.0",
-    "react-icons": "^4.12.0"
+    "react-icons": "^4.12.0",
+    "react-hot-toast": "^2.4.1"
   },
   "devDependencies": {
     "@types/date-fns": "^2.6.0",
