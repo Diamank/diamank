@@ -1,31 +1,32 @@
-import { useState } from "react";
-import toast from "react-hot-toast";
+import { useState } from 'react'
+import toast, { Toaster } from 'react-hot-toast'
 
 export default function Notas() {
-  const [xml, setXml] = useState<File | null>(null);
-  const [pdf, setPdf] = useState<File | null>(null);
-  const [xmlPreview, setXmlPreview] = useState<any>(null);
-  const [historico, setHistorico] = useState<any[]>([]);
+  const [xml, setXml] = useState<File | null>(null)
+  const [pdf, setPdf] = useState<File | null>(null)
+  const [xmlPreview, setXmlPreview] = useState<any>(null)
+  const [formData, setFormData] = useState<any>({ destinatario: '', valor: '', vencimento: '' })
+  const [notas, setNotas] = useState<any[]>([])
 
   const handleXmlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const file = e.target.files?.[0]
+    if (!file) return
 
-    setXml(file);
+    setXml(file)
 
-    const reader = new FileReader();
+    const reader = new FileReader()
     reader.onload = () => {
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(reader.result as string, "text/xml");
+      const parser = new DOMParser()
+      const xmlDoc = parser.parseFromString(reader.result as string, 'text/xml')
 
-      const emit = xmlDoc.getElementsByTagName("emit")[0];
-      const dest = xmlDoc.getElementsByTagName("dest")[0];
-      const total = xmlDoc.getElementsByTagName("vNF")[0];
-      const venc = xmlDoc.getElementsByTagName("venc")[0];
-      const numero = xmlDoc.getElementsByTagName("nNF")[0];
-      const chave = xmlDoc.getElementsByTagName("infNFe")[0]?.getAttribute("Id")?.slice(3);
+      const emit = xmlDoc.getElementsByTagName("emit")[0]
+      const dest = xmlDoc.getElementsByTagName("dest")[0]
+      const total = xmlDoc.getElementsByTagName("vNF")[0]
+      const venc = xmlDoc.getElementsByTagName("venc")[0]
+      const numero = xmlDoc.getElementsByTagName("nNF")[0]
+      const chave = xmlDoc.getElementsByTagName("infNFe")[0]?.getAttribute("Id")?.slice(3)
 
-      setXmlPreview({
+      const preview = {
         emitente: emit?.getElementsByTagName("xNome")[0]?.textContent,
         destinatario: dest?.getElementsByTagName("xNome")[0]?.textContent,
         cnpj: dest?.getElementsByTagName("CNPJ")[0]?.textContent,
@@ -33,47 +34,38 @@ export default function Notas() {
         vencimento: venc?.textContent,
         numero: numero?.textContent,
         chave
-      });
-    };
+      }
 
-    reader.readAsText(file);
-  };
+      setXmlPreview(preview)
+      if (!venc) {
+        setFormData((prev: any) => ({ ...prev, vencimento: '' }))
+      }
+    }
+    reader.readAsText(file)
+  }
 
   const handleUpload = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
-    if (!pdf) {
-      toast.error("É necessário enviar o PDF da nota.");
-      return;
+    const nota = {
+      sacado: xmlPreview?.destinatario || formData.destinatario,
+      valor: xmlPreview?.valor || formData.valor,
+      vencimento: xmlPreview?.vencimento || formData.vencimento,
+      status: 'Pendente'
     }
 
-    if (!xmlPreview) {
-      toast.error("XML inválido ou não carregado.");
-      return;
-    }
+    setNotas((prev) => [...prev, nota])
+    toast.success('Nota enviada com sucesso!')
 
-    const novaNota = {
-      sacado: xmlPreview.destinatario,
-      valor: Number(xmlPreview.valor).toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL"
-      }),
-      vencimento: xmlPreview.vencimento || "—",
-      status: "Pendente"
-    };
-
-    setHistorico((prev) => [...prev, novaNota]);
-
-    toast.success("Nota enviada com sucesso!");
-
-    // Limpa arquivos e preview após envio
-    setXml(null);
-    setPdf(null);
-    setXmlPreview(null);
-  };
+    setXml(null)
+    setPdf(null)
+    setXmlPreview(null)
+    setFormData({ destinatario: '', valor: '', vencimento: '' })
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
+      <Toaster position="top-right" />
       <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-md p-6">
         <h1 className="text-2xl font-bold mb-4">Notas Fiscais</h1>
 
@@ -85,7 +77,6 @@ export default function Notas() {
               accept=".xml"
               onChange={handleXmlChange}
               className="w-full border rounded-lg px-3 py-2"
-              required
             />
           </div>
           <div>
@@ -95,9 +86,37 @@ export default function Notas() {
               accept=".pdf"
               onChange={(e) => setPdf(e.target.files?.[0] || null)}
               className="w-full border rounded-lg px-3 py-2"
-              required
             />
           </div>
+
+          {!xml && pdf && (
+            <>
+              <input
+                type="text"
+                placeholder="Destinatário"
+                className="w-full border rounded-lg px-3 py-2"
+                value={formData.destinatario}
+                onChange={(e) => setFormData({ ...formData, destinatario: e.target.value })}
+                required
+              />
+              <input
+                type="number"
+                placeholder="Valor"
+                className="w-full border rounded-lg px-3 py-2"
+                value={formData.valor}
+                onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
+                required
+              />
+              <input
+                type="date"
+                placeholder="Vencimento"
+                className="w-full border rounded-lg px-3 py-2"
+                value={formData.vencimento}
+                onChange={(e) => setFormData({ ...formData, vencimento: e.target.value })}
+                required
+              />
+            </>
+          )}
 
           {xmlPreview && (
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-800">
@@ -106,7 +125,15 @@ export default function Notas() {
               <p><strong>CNPJ:</strong> {xmlPreview.cnpj}</p>
               <p><strong>Nota Nº:</strong> {xmlPreview.numero}</p>
               <p><strong>Valor:</strong> R$ {Number(xmlPreview.valor).toFixed(2)}</p>
-              <p><strong>Vencimento:</strong> {xmlPreview.vencimento || "—"}</p>
+              <p><strong>Vencimento:</strong> {xmlPreview.vencimento || (
+                <input
+                  type="date"
+                  className="border rounded px-2 py-1"
+                  value={formData.vencimento}
+                  onChange={(e) => setFormData({ ...formData, vencimento: e.target.value })}
+                  required
+                />
+              )}</p>
               <p><strong>Chave:</strong> {xmlPreview.chave}</p>
             </div>
           )}
@@ -114,6 +141,7 @@ export default function Notas() {
           <button
             type="submit"
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+            disabled={!pdf && !xml}
           >
             Enviar Nota
           </button>
@@ -131,12 +159,12 @@ export default function Notas() {
               </tr>
             </thead>
             <tbody>
-              {historico.map((nota, i) => (
+              {notas.map((n, i) => (
                 <tr key={i} className="border-t">
-                  <td className="p-2">{nota.sacado}</td>
-                  <td className="p-2">{nota.valor}</td>
-                  <td className="p-2">{nota.vencimento}</td>
-                  <td className="p-2 text-yellow-600 font-semibold">{nota.status}</td>
+                  <td className="p-2">{n.sacado}</td>
+                  <td className="p-2">R$ {Number(n.valor).toFixed(2)}</td>
+                  <td className="p-2">{n.vencimento}</td>
+                  <td className="p-2 text-yellow-600 font-semibold">{n.status}</td>
                 </tr>
               ))}
             </tbody>
@@ -144,5 +172,5 @@ export default function Notas() {
         </div>
       </div>
     </div>
-  );
+  )
 }
